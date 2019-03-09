@@ -17,14 +17,20 @@ sudo docker exec -it my_mysql bash
 echo "Following is inside the container"
 apt-get update
 apt-get install wget p7zip-full -y unzip
-
+```
+**Download the data** 
+```
 wget https://archive.org/download/stackexchange/coffee.stackexchange.com.7z
 wget http://www.mysqltutorial.org/wp-content/uploads/2018/03/mysqlsampledatabase.zip
 wget https://raw.githubusercontent.com/benjaco-edu/db-assignment-6-perfomacne/master/CreateTables.sql
 
 7z e coffee.stackexchange.com.7z 
 unzip mysqlsampledatabase.zip
+```
+**The rest will be executed inside of the mysql bash**
 
+The flag is used to get access to the xml data when it has to be imported
+```
 mysql -u root -ppass1234  --local-infile
 
 source ./CreateTables.sql;

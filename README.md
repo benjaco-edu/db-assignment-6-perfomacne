@@ -35,6 +35,8 @@ mysql -u root -ppass1234  --local-infile
 
 source ./CreateTables.sql;
 source ./mysqlsampledatabase.sql
+
+use classicmodels;
 ```
 
 ### Excercise 1
@@ -87,9 +89,48 @@ When I run the query again, the cost is drasical reduces from to 42 to 7, still 
 
 We want to find out how much each office has sold and the max single payment for each office. Write two queries which give this information
 
+I take the path from offices and then go all the way down to paymants
+
 #### using grouping
 
+... where I find the maximum and sum of the group
+
+```sql
+select offices.officeCode, offices.city, sum(amount) as "sum", max(amount) as "max"
+from offices
+left join employees e on offices.officeCode = e.officeCode
+left join customers c on e.employeeNumber = c.salesRepEmployeeNumber
+left join payments p on c.customerNumber = p.customerNumber
+group by offices.officeCode
+```
+
+Which executes:
+
+![perf](https://raw.githubusercontent.com/benjaco-edu/db-assignment-6-perfomacne/master/e31.png)
+
 #### using windowing
+
+... where I find the maximum and sum of the partition by the office code
+
+```sql
+select offices.city as "officeCity",
+       e.firstName as "employ",
+       c.customerName,
+       p.paymentDate,
+       p.amount,
+       sum(p.amount) over (partition by offices.officeCode) as "sumForOffice",
+       max(p.amount) over (partition by offices.officeCode) as "maxForOffice"
+from offices
+left join employees e on offices.officeCode = e.officeCode
+left join customers c on e.employeeNumber = c.salesRepEmployeeNumber
+left join payments p on c.customerNumber = p.customerNumber
+where p.amount is not null
+```
+
+Which executes a lot slower:
+
+![perf](https://raw.githubusercontent.com/benjaco-edu/db-assignment-6-perfomacne/master/e32.png)
+
 
 ### Exercise 4
 

@@ -11,11 +11,11 @@ You will be put inside the docker container where you have to execute all of the
 
 **Start container and install dependencies to fetch the database**
 ```
-sudo docker run --rm --name mysql01 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=pass1234 -d mysql
-sudo docker exec -it mysql01 bash 
+sudo docker run --rm --name my_mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=pass1234 -d mysql
+sudo docker exec -it my_mysql bash 
 
+echo "Following is inside the container"
 apt-get update
-
 apt-get install wget p7zip-full -y unzip
 
 wget https://archive.org/download/stackexchange/coffee.stackexchange.com.7z
@@ -30,3 +30,11 @@ mysql -u root -ppass1234  --local-infile
 source ./CreateTables.sql;
 source ./mysqlsampledatabase.sql
 ```
+
+## Cleanup
+
+Exit the shell with `exit` then `CTRL + d`
+
+Remove the docker container with `sudo docker rm -f my_mysql`
+
+

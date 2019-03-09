@@ -63,7 +63,7 @@ from customers
 where customers.postalCode = offices.postalCode
   and customers.city = offices.city
   and customers.state = offices.state
-  and customers.country = offices.country
+  and customers.country = offices.country;
 ```
 ![perf](https://raw.githubusercontent.com/benjaco-edu/db-assignment-6-perfomacne/master/e1.png)
 
@@ -101,7 +101,7 @@ from offices
 left join employees e on offices.officeCode = e.officeCode
 left join customers c on e.employeeNumber = c.salesRepEmployeeNumber
 left join payments p on c.customerNumber = p.customerNumber
-group by offices.officeCode
+group by offices.officeCode;
 ```
 
 Which executes:
@@ -124,23 +124,72 @@ from offices
 left join employees e on offices.officeCode = e.officeCode
 left join customers c on e.employeeNumber = c.salesRepEmployeeNumber
 left join payments p on c.customerNumber = p.customerNumber
-where p.amount is not null
+where p.amount is not null;
 ```
 
 Which executes a lot slower:
 
 ![perf](https://raw.githubusercontent.com/benjaco-edu/db-assignment-6-perfomacne/master/e32.png)
 
+#### Summery
+
+I think the windowing is slower because at has to make a bigger resultset, it clearly not trying to calculate it for eaxh row because it is not 500 times slower.
 
 ### Exercise 4
 
-In the stackexchange forum for coffee (coffee.stackexchange.com), write a query which return the displayName and title of all posts which with the word groundsin the title.
+In the stackexchange forum for coffee (coffee.stackexchange.com), write a query which return the displayName and title of all posts which with the word groundsinthe title.
+
+To show the cost of joining, I started without a join:
+
+```sql
+select Title from posts where Title like "%grounds%";
+```
+Which executes:
+
+![perf](https://raw.githubusercontent.com/benjaco-edu/db-assignment-6-perfomacne/master/e41.png)
+
+Then with the join:
+
+```sql
+select Title, DisplayName from posts
+left join users on users.Id = posts.OwnerUserId
+where Title like "%grounds%";
+```
+
+
+Which executes:
+
+![perf](https://raw.githubusercontent.com/benjaco-edu/db-assignment-6-perfomacne/master/e42.png)
+
+It is only a little slower thanks to the index.
+
+
 
 ### Exercise 5
 
 Add a full text index to the posts table and change the query from exercise 4 so it no longer scans the entire posts table.
 
+Add the index:
+```sql
+create fulltext index idx_posts_Title
+  on posts (Title);
+```
 
+The query has to be modified to use the index, the new filter function is MATCH
+
+```sql
+select Title, DisplayName from posts
+left join users on users.Id = posts.OwnerUserId
+where match(Title) against('+grounds' IN BOOLEAN MODE);
+```
+
+Boolean mode means that words can be required my adding `+` in fron of the word, and can be deselected by adding a `-` in front of a word,
+
+Which executes:
+
+![perf](https://raw.githubusercontent.com/benjaco-edu/db-assignment-6-perfomacne/master/e5.png)
+
+A whole lot faster, it can now go directly to the word instead of checking each row.
 
 
 ## Cleanup

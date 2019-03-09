@@ -37,6 +37,71 @@ source ./CreateTables.sql;
 source ./mysqlsampledatabase.sql
 ```
 
+### Excercise 1
+
+In the classicmodels database, write a query that picks out those customers who are in the same city as office of their sales representative.
+
+I selected all customers where the sales rep mathes thir postalCode, city, state and contry. In some cases, the same postcal code can be in [multiple states](https://gis.stackexchange.com/a/167333), that is the reason i matched for all fields, and it sgould depend on the desired behaviour.  It did not cost extra to check all fields.
+
+```sql
+select customers.customerNumber,
+       customers.customerName,
+
+       customers.postalCode,
+       customers.city,
+       customers.state,
+       customers.country,
+
+       customers.salesRepEmployeeNumber,
+       employees.employeeNumber,
+       concat(employees.firstName, " ", employees.lastName) as "employeeName"
+from customers
+       left join employees on customers.salesRepEmployeeNumber = employees.employeeNumber
+       left join offices on employees.officeCode = offices.officeCode
+where customers.postalCode = offices.postalCode
+  and customers.city = offices.city
+  and customers.state = offices.state
+  and customers.country = offices.country
+```
+![perf](https://raw.githubusercontent.com/benjaco-edu/db-assignment-6-perfomacne/master/e1.png)
+
+The red box is the missing index on office code for employees for this query
+
+### Exercise 2
+
+Change the database schema so that the query from exercise get better performance.
+
+I have add a index on the city with the columns I apply the fiter on. 
+
+```sql
+create index city_index
+  on customers (city, state, postalCode, country);
+```
+
+When I run the query again, the cost is drasical reduces from to 42 to 7, still have a full table scan but it is on a small table.
+
+![perf](https://raw.githubusercontent.com/benjaco-edu/db-assignment-6-perfomacne/master/e2.png)
+
+
+### Exercise 3
+
+We want to find out how much each office has sold and the max single payment for each office. Write two queries which give this information
+
+#### using grouping
+
+#### using windowing
+
+### Exercise 4
+
+In the stackexchange forum for coffee (coffee.stackexchange.com), write a query which return the displayName and title of all posts which with the word groundsin the title.
+
+### Exercise 5
+
+Add a full text index to the posts table and change the query from exercise 4 so it no longer scans the entire posts table.
+
+
+
+
 ## Cleanup
 
 Exit the shell with `exit` then `CTRL + d`

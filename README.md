@@ -9,7 +9,7 @@ Following will download the data, and create a Docker container.
 
 You will be put inside the docker container where you have to execute all of the following commands
 
-**Start container and install dependencies to fetch the database**
+**Start the container and install dependencies to fetch the database**
 ```
 sudo docker run --rm --name my_mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=pass1234 -d mysql
 sudo docker exec -it my_mysql bash 
@@ -27,9 +27,9 @@ wget https://raw.githubusercontent.com/benjaco-edu/db-assignment-6-perfomacne/ma
 7z e coffee.stackexchange.com.7z 
 unzip mysqlsampledatabase.zip
 ```
-**The rest will be executed inside of the mysql bash**
+**The rest will be executed inside of the MySQL bash**
 
-The flag is used to get access to the xml data when it has to be imported
+The flag is used to get access to the XML data when it has to be imported
 ```
 mysql -u root -ppass1234  --local-infile
 
@@ -41,9 +41,9 @@ use classicmodels;
 
 ### Excercise 1
 
-In the classicmodels database, write a query that picks out those customers who are in the same city as office of their sales representative.
+In the classicmodels database, write a query that picks out those customers who are in the same city as the office of their sales representative.
 
-I selected all customers where the sales rep mathes thir postalCode, city, state and contry. In some cases, the same postcal code can be in [multiple states](https://gis.stackexchange.com/a/167333), that is the reason i matched for all fields, and it sgould depend on the desired behaviour.  It did not cost extra to check all fields.
+I selected all customers where the sales rep matches their postalCode, city, state, and country. In some cases, the same postal code can be in [multiple states](https://gis.stackexchange.com/a/167333), that is the reason I matched for all fields, and it should depend on the desired behavior.  It did not cost extra to check all fields.
 
 ```sql
 select customers.customerNumber,
@@ -73,14 +73,14 @@ The red box is the missing index on office code for employees for this query
 
 Change the database schema so that the query from exercise get better performance.
 
-I have add a index on the city with the columns I apply the fiter on. 
+I have added an index on the city with the columns I apply the filter on. 
 
 ```sql
 create index city_index
   on customers (city, state, postalCode, country);
 ```
 
-When I run the query again, the cost is drasical reduces from to 42 to 7, still have a full table scan but it is on a small table.
+When I run the query again, the cost is drastically reduces from to 42 to 7, still have a full table scan but it is on a small table.
 
 ![perf](https://raw.githubusercontent.com/benjaco-edu/db-assignment-6-perfomacne/master/e2.png)
 
@@ -89,7 +89,7 @@ When I run the query again, the cost is drasical reduces from to 42 to 7, still 
 
 We want to find out how much each office has sold and the max single payment for each office. Write two queries which give this information
 
-I take the path from offices and then go all the way down to paymants
+I take the path from offices and then go all the way down to payments
 
 #### using grouping
 
@@ -133,11 +133,11 @@ Which executes a lot slower:
 
 #### Summery
 
-I think the windowing is slower because at has to make a bigger resultset, it clearly not trying to calculate it for eaxh row because it is not 500 times slower.
+I think the windowing is slower because it has to make a bigger resultset, it clearly not trying to calculate it for each row because it is not 500 times slower.
 
 ### Exercise 4
 
-In the stackexchange forum for coffee (coffee.stackexchange.com), write a query which return the displayName and title of all posts which with the word groundsinthe title.
+In the stackexchange forum for coffee (coffee.stackexchange.com), write a query which returns the displayName and title of all posts which with the word groundsinthe title.
 
 To show the cost of joining, I started without a join:
 
@@ -168,7 +168,7 @@ It is only a little slower thanks to the index.
 
 ### Exercise 5
 
-Add a full text index to the posts table and change the query from exercise 4 so it no longer scans the entire posts table.
+Add a full-text index to the posts table and change the query from exercise 4 so it no longer scans the entire posts table.
 
 Add the index:
 ```sql
@@ -184,7 +184,7 @@ left join users on users.Id = posts.OwnerUserId
 where match(Title) against('+grounds' IN BOOLEAN MODE);
 ```
 
-Boolean mode means that words can be required my adding `+` in fron of the word, and can be deselected by adding a `-` in front of a word,
+Boolean mode means that words can be required by adding `+` in front of the word, and can be deselected by adding a `-` in front of a word,
 
 Which executes:
 

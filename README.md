@@ -142,6 +142,7 @@ In the stackexchange forum for coffee (coffee.stackexchange.com), write a query 
 To show the cost of joining, I started without a join:
 
 ```sql
+use stackoverflow;
 select Title from posts where Title like "%grounds%";
 ```
 Which executes:
